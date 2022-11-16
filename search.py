@@ -72,64 +72,6 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def vInArr(child, visited):
-    for el in visited:
-        if child == el[0]:
-            return True
-    return False
-
-def mapVertices(problem: SearchProblem, v_tuple, v, visited):
-    successors = problem.getSuccessors(v)
-    # print("visited", visited)
-    for child in successors:
-        # print("child", child)
-        if not vInArr(child, visited):
-            # print("child not in visited")
-            visited.append((child, False))
-            mapVertices(problem, child, child[0], visited)
-
-def childIndex(i, visited):
-    count = 0
-    for el in visited:
-        if i == el[0]:
-            return count
-        count+=1
-
-def DFSUtil(problem: SearchProblem, start, v_index, visited, actions):
-    # Mark the current node as visited
-    visited[v_index] = (visited[v_index][0], True)
-    if visited[v_index][0] != start:
-        actions.append(visited[v_index][0][1])
-    
-    if (visited[v_index][0] != start and problem.isGoalState(visited[v_index][0])) or (visited[v_index][0] != start and problem.isGoalState(visited[v_index][0][0])):
-        print("found:", visited[v_index][0][0])
-        return actions
-
-    # Recur for all the vertices adjacent to
-    # this vertex
-    if visited[v_index][0] == start:
-        successors = problem.getSuccessors(visited[v_index][0])
-    else:
-        successors = problem.getSuccessors(visited[v_index][0][0])
-    for i in successors:
-        if visited[childIndex(i, visited)][1] == False:
-            DFSUtil(problem, start, childIndex(i, visited), visited, actions)
-
-def DFSUtil(problem: SearchProblem, v, start, path = [], visited = set()):
-    if v != start:
-        path.append(v[1])
-    visited.add(v)
-    print(path)
-    if (v == start and problem.isGoalState(v)) or (v != start and problem.isGoalState(v[0])):
-        return path
-    for neighbour in problem.getSuccessors(v):
-        if neighbour not in visited:
-            result = DFSUtil(problem, neighbour, start, path, visited)
-            if result is not None:
-                return result
-    path.pop()
-    return None
-
 def depthFirstSearch(problem: SearchProblem):
     """
     Search the deepest nodes in the search tree first.
@@ -142,60 +84,22 @@ def depthFirstSearch(problem: SearchProblem):
     """
 
     start = problem.getStartState()
-    # visited = [(start, False)]
-    # actions = []
-    # mapVertices(problem, start, start, visited)
+    reached, actions = [], []
+    frontier, actionsRev = util.Stack(), util.Stack()
+    frontier.push(start)
 
-    # # Call the recursive helper function to print
-    # # DFS traversal starting from all vertices one
-    # # by one
-    # for i in range(len(visited)):
-    #     if visited[i][1] == False:
-            # DFSUtil(problem, start, i, visited, actions)
-    
-    # print(actions)
-    # return actions
-    return DFSUtil(problem, start, start)
+    node = frontier.pop()
+    # depth-first search
+    while not problem.isGoalState(node):
+        if node not in reached:
+            reached.append(node)
+            for child in problem.getSuccessors(node):
+                frontier.push(child[0])
+                actionsRev.push(actions + [child[1]])
+        node = frontier.pop()
+        actions = actionsRev.pop()  # traceback path
 
-# def depthFirstSearch(problem: SearchProblem):
-#     """
-#     Search the deepest nodes in the search tree first.
-
-#     Your search algorithm needs to return a list of actions that reaches the
-#     goal. Make sure to implement a graph search algorithm.
-
-#     To get started, you might want to try some of these simple commands to
-#     understand the search problem that is being passed in:
-#     """
-
-#     start = problem.getStartState()
-#     parentMap = {}
-#     reached, frontier, actions = [], [], []
-#     frontier.append(start)
-
-#     # depth-first search
-#     while frontier:
-#         node = frontier.pop()
-#         if (node == start and problem.isGoalState(node)) or (node != start and problem.isGoalState(node[0])):
-#             break
-#         if node not in reached:
-#             reached.append(node)
-#             if node == start:
-#                 successors = problem.getSuccessors(node)
-#             else:
-#                 successors = problem.getSuccessors(node[0])
-#             for child in successors:
-#                 frontier.append(child)
-#                 if child not in parentMap:
-#                     parentMap[child] = node
-
-#     # traceback solution
-#     curr = node
-#     while (curr != start):
-#         actions.insert(0, curr[1])
-#         curr = parentMap[curr]
-
-#     return actions
+    return actions
 
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
