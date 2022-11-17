@@ -84,7 +84,7 @@ def depthFirstSearch(problem: SearchProblem):
     """
 
     start = problem.getStartState()
-    reached, actions = [], []
+    reached, actions, actlst = [], [], []
     frontier, actionsRev = util.Stack(), util.Stack()
     frontier.push(start)
 
@@ -96,8 +96,9 @@ def depthFirstSearch(problem: SearchProblem):
             for child in problem.getSuccessors(node):
                 frontier.push(child[0])
                 actionsRev.push(actions + [child[1]])
-        node = frontier.pop()
+
         actions = actionsRev.pop()  # traceback path
+        node = frontier.pop()
 
     return actions
 
@@ -116,32 +117,31 @@ def breadthFirstSearch(problem: SearchProblem):
             for child in problem.getSuccessors(node):
                 frontier.push(child[0])
                 actionsRev.push(actions + [child[1]])
-        node = frontier.pop()
+
         actions = actionsRev.pop()  # traceback path
+        node = frontier.pop()
 
     return actions
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    frontier = util.PriorityQueue()  # Stores states that need to be expanded for Uniform Cost Search.
-    actionsRev = util.PriorityQueue()  # Stores path of expanded states.
-    reached = []  # Stores states that have been expanded.
-    actions = []  # Store final path of states.
+    start = problem.getStartState()
+    frontier, actionsRev = util.PriorityQueue(), util.PriorityQueue()
+    reached, actions = [], []
 
-    frontier.push(problem.getStartState(), 0)
-    node = frontier.pop()  # Current State.
-    while not problem.isGoalState(node):  # Search until goal state.
-        if node not in reached:  # New state found.
-            reached.append(node)  # Add state to reached.
+    frontier.push(start, 0)
+    node = frontier.pop()
+    while not problem.isGoalState(node):
+        if node not in reached:
+            reached.append(node)
+            for child in problem.getSuccessors(node):
+                costOfActions = problem.getCostOfActions(actions + [child[1]])
+                if child[0] not in reached:
+                    frontier.push(child[0], costOfActions)
+                    actionsRev.push(actions + [child[1]], costOfActions)
 
-            for child in problem.getSuccessors(node):  # To calculate costs of successors of current state.
-                pathCost = problem.getCostOfActions(actions + [child[1]])  # Cost of selecting successor.
-                if child[0] not in reached:  # If successor is a new state add to frontier queue and store path.
-                    frontier.push(child[0], pathCost)
-                    actionsRev.push(actions + [child[1]], pathCost)
-
-        node = frontier.pop()  # Update current state.
-        actions = actionsRev.pop()  # Add to final path.
+        actions = actionsRev.pop()
+        node = frontier.pop()
     
     return actions
 
@@ -155,7 +155,26 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    frontier, actionsRev = util.PriorityQueue(), util.PriorityQueue()
+    reached, actions = [], []
+
+    frontier.push(start, 0)
+    node = frontier.pop()
+    while not problem.isGoalState(node):
+        if node not in reached:
+            reached.append(node)
+            for child in problem.getSuccessors(node):
+                costOfActions = problem.getCostOfActions(actions + [child[1]])
+                costOfActions += heuristic(child[0], problem)
+                if child[0] not in reached:
+                    frontier.push(child[0], costOfActions)
+                    actionsRev.push(actions + [child[1]], costOfActions)
+
+        actions = actionsRev.pop()
+        node = frontier.pop()
+    
+    return actions
 
 
 # Abbreviations
