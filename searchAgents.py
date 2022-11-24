@@ -311,6 +311,8 @@ class CornersProblem(search.SearchProblem):
                 reached.append(currPos)
             if len(reached) == 4:
                 return True
+            else:
+                return False
         return False
 
     def getSuccessors(self, state: Any):
@@ -335,8 +337,12 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
             if not hitsWall:
-                nextState = (nextx, nexty)
-                successor = (nextState, , 1)
+                node = (nextx, nexty)
+                reachedCorners = list(state[1])
+                if node not in reachedCorners and node in self.corners:
+                    reachedCorners.append(node)
+                child = ((node, reachedCorners), action, 1)
+                successors.append(child)
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
