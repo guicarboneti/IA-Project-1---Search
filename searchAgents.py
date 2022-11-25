@@ -485,9 +485,10 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     foodList = foodGrid.asList()
     maxheuristic = 0
     for food in foodList:
-        heuristic = util.manhattanDistance(position, food)
+        heuristic = mazeDistance(position, food, problem.startingGameState)
         if heuristic > maxheuristic:
             maxheuristic = heuristic
+
     return maxheuristic
 
 class ClosestDotSearchAgent(SearchAgent):
